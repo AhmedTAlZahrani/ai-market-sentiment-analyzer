@@ -1,0 +1,13 @@
+🚀 Starting AI Market Sentiment pipeline at 2025-10-10_13-03-43
+
+
+▶️ Running: python src/collect_data.py
+
+▶️ Running: python src/sentiment_analysis.py
+
+▶️ Running: python src/merge_sentiment_prices.py
+
+▶️ Running: python src/analyze_correlation.py
+
+✅ Pipeline completed successfully.
+📝 Log saved at: logs/run_2025-10-10_13-03-43.txt
