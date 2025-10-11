@@ -1,3 +1,28 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AhmedTAlzahrani/ai-market-sentiment-analyzer/main/assets/banner_ai_market_sentiment.png" alt="AI Market Sentiment Analyzer Banner" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/AhmedTAlzahrani/ai-market-sentiment-analyzer/stargazers">
+    <img src="https://img.shields.io/github/stars/AhmedTAlzahrani/ai-market-sentiment-analyzer?color=gold&style=for-the-badge" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/AhmedTAlzahrani/ai-market-sentiment-analyzer/issues">
+    <img src="https://img.shields.io/github/issues/AhmedTAlzahrani/ai-market-sentiment-analyzer?style=for-the-badge" alt="Issues">
+  </a>
+  <a href="https://github.com/AhmedTAlzahrani/ai-market-sentiment-analyzer/commits/main">
+    <img src="https://img.shields.io/github/last-commit/AhmedTAlzahrani/ai-market-sentiment-analyzer?style=for-the-badge&color=blue" alt="Last Commit">
+  </a>
+  <img src="https://img.shields.io/badge/Made%20With-Python%203.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Framework-Streamlit-E43C2C?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit">
+  <img src="https://img.shields.io/badge/Model-FinBERT-9cf?style=for-the-badge" alt="FinBERT">
+  <img src="https://img.shields.io/badge/Status-Research%20Preview-success?style=for-the-badge&color=brightgreen" alt="Status">
+</p>
+
+<h1 align="center">💹 AI Market Sentiment Analyzer (FinBERT + Quant Signals)</h1>
+<h3 align="center">Scientific, Data-Driven Insights on News, Sentiment, and Market Behavior</h3>
+
+---
+
 AI Market Sentiment Analyzer (FinBERT + Quant Signals)
 
 Public repo purpose: a reproducible, scientific pipeline that (1) collects financial headlines, (2) scores sentiment using a finance-specific transformer (FinBERT), (3) merges sentiment with market returns, (4) computes statistics and correlations, (5) engineers technical indicators, (6) trains baseline ML models with walk-forward CV, and (7) runs a simple, risk-aware backtest. A Streamlit dashboard presents results.
@@ -525,3 +550,4 @@ This project is for research/education; it is not financial advice.
 🔚 TL;DR
 
 This repo shows, with scientific transparency, how news sentiment (FinBERT) relates to market moves, how to validate predictive value with walk-forward ML, and how to sanity-check it with a simple backtest—all reproducible and visualized in a single dashboard.
+
