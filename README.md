@@ -18,435 +18,61 @@
   <img src="https://img.shields.io/badge/Status-Research%20Preview-success?style=for-the-badge&color=brightgreen" alt="Status">
 </p>
 
-<h1 align="center">💹 AI Market Sentiment Analyzer (FinBERT + Quant Signals)</h1>
-<h3 align="center">Scientific, Data-Driven Insights on News, Sentiment, and Market Behavior</h3>
+<h1 align="center">AI Market Sentiment Analyzer</h1>
+<h3 align="center">FinBERT + Quant Signals | Scientific, Data-Driven Market Insights</h3>
 
 ---
 
-## 📘 Overview
-The **AI Market Sentiment Analyzer** is a reproducible, research-grade pipeline that:
+## Overview
 
-1. Collects financial headlines  
-2. Scores sentiment using **FinBERT** (finance-specific transformer)  
-3. Merges sentiment with **market returns**  
-4. Computes statistics and correlations  
-5. Engineers **technical indicators**  
-6. Trains baseline ML models with **walk-forward cross-validation**  
-7. Runs a **risk-aware backtest**  
-8. Visualizes results via **Streamlit dashboard**
+The **AI Market Sentiment Analyzer** is a reproducible, research-grade pipeline that connects financial news sentiment to market behavior. It covers the full workflow end-to-end:
 
----
-
-## ✨ Key Outcomes
-- **Sentiment Source:** 400 FinViz headlines → aggregated daily FinBERT sentiment per ticker  
-- **Market Link:** Merged with daily % returns (Yahoo Finance)  
-- **Example Insight:** SPY shows *Pearson r ≈ +0.356* between daily sentiment and returns (moderate positive association)  
-- **Deliverables:** CSVs in `data/processed/` + interactive dashboard (`app.py`)  
-
-All results dynamically update when new data is fetched. Treat values as evolving estimates that stabilize over time.
+1. **Collect** financial headlines from FinViz and price data from Yahoo Finance
+2. **Score** sentiment using **FinBERT** (a finance-specific transformer model)
+3. **Merge** daily sentiment scores with market returns
+4. **Compute** technical indicators (RSI, MACD, Bollinger Bands)
+5. **Engineer** ML features with lag, rolling, and volatility signals
+6. **Train** baseline models with **walk-forward cross-validation**
+7. **Backtest** a rule-based trading strategy with risk-aware KPIs
+8. **Visualize** everything in an interactive **Streamlit dashboard**
 
 ---
 
-## 🧭 Repository Structure
-ai-market-sentiment-analyzer/
-├── data/
-│ ├── raw/ # price CSVs + headlines
-│ └── processed/ # cleaned, ready-to-use outputs
-├── src/
-│ ├── fetch_stock_data.py
-│ ├── sentiment_analysis_finbert.py
-│ ├── merge_sentiment_prices.py
-│ ├── analyze_correlation.py
-│ ├── compute_indicators.py
-│ ├── features_signal_engine.py
-│ ├── walkforward_cv.py
-│ ├── backtest_pro.py
-│ └── report_daily.py
-├── app.py # Streamlit dashboard
-├── run_all.py # One-command pipeline
-└── README.md
-python run_all.py
-Runs the entire pipeline sequentially:
+## Quick Start
 
-fetch_stock_data.py
+### 1. Clone & Install
 
-sentiment_analysis_finbert.py
-
-merge_sentiment_prices.py
-
-compute_indicators.py
-
-features_signal_engine.py
-
-walkforward_cv.py
-
-backtest_pro.py
-
-analyze_correlation.py
-
-report_daily.py (optional)
-
-Outputs are stored in data/processed/.
-📊 Dashboard
-streamlit run app.py
-| Tab                     | Description                             |
-| ----------------------- | --------------------------------------- |
-| **Sentiment Trend**     | FinBERT daily sentiment by ticker       |
-| **Sentiment vs Return** | Scatter + OLS trendline                 |
-| **Correlation Summary** | Pearson r per ticker                    |
-| **Indicators**          | RSI(14), MACD(12/26/9), Bollinger width |
-| **Predictions (WF-CV)** | Out-of-sample R² & MAE (Ridge, XGBoost) |
-| **Backtest & Signals**  | Strategy KPIs and equity curves         |
-| File                                         | Description                         |
-| -------------------------------------------- | ----------------------------------- |
-| `data/raw/finviz_news.csv`                   | Headlines (Ticker, Date, Headline)  |
-| `data/processed/daily_sentiment_finbert.csv` | Daily FinBERT sentiment per ticker  |
-| `data/processed/sentiment_price_merged.csv`  | Combined sentiment + market returns |
-| `data/processed/technical_indicators.csv`    | RSI14, MACD, Bollinger width        |
-| `data/processed/features_dataset.csv`        | ML features + target                |
-| `data/processed/model_cv_results.csv`        | Walk-forward CV metrics             |
-| `data/processed/predictions_nextday.csv`     | Latest next-day predictions         |
-| `data/processed/signals_dataset.csv`         | Entry/exit trading signals          |
-| `data/processed/backtest_results.csv`        | Strategy KPIs (CAGR, Sharpe, etc.)  |
-| `output/Daily_Brief_*.pdf`                   | Optional auto-generated report      |
-🧠 Scientific Methodology
-1. Text → Sentiment (FinBERT)
-
-Model: ProsusAI/finbert
-
-Output: probabilities p(neg), p(neu), p(pos)
-
-Score = p(pos) − p(neg) → range [−1, +1]
-
-Aggregated as mean sentiment per (Ticker, Date)
-
-2. Market Data & Returns
-
-Source: Yahoo Finance (yfinance)
-
-Daily return formula:
-
-𝑟
-𝑡
-=
-100
-×
-𝑃
-𝑡
-−
-𝑃
-𝑡
-−
-1
-𝑃
-𝑡
-−
-1
-r
-t
-	​
-
-=100×
-P
-t−1
-	​
-
-P
-t
-	​
-
-−P
-t−1
-	​
-
-	​
-
-
-Where:
-
-$P_t$ = closing price on day t
-
-$r_t$ = daily percentage return
-
-Data are joined on (Ticker, Date) with daily sentiment to prevent look-ahead bias.
-
-3. Correlation Analysis
-
-Pearson correlation between sentiment ($S_t$) and return ($R_t$):
-
-𝑟
-=
-∑
-(
-𝑆
-𝑡
-−
-𝑆
-ˉ
-)
-(
-𝑅
-𝑡
-−
-𝑅
-ˉ
-)
-∑
-(
-𝑆
-𝑡
-−
-𝑆
-ˉ
-)
-2
-∑
-(
-𝑅
-𝑡
-−
-𝑅
-ˉ
-)
-2
-r=
-∑(S
-t
-	​
-
-−
-S
-ˉ
-)
-2
-∑(R
-t
-	​
-
-−
-R
-ˉ
-)
-2
-	​
-
-∑(S
-t
-	​
-
-−
-S
-ˉ
-)(R
-t
-	​
-
-−
-R
-ˉ
-)
-	​
-
-
-Where:
-
-$r \in [-1, 1]$
-
-Small samples can inflate $|r|$; stability improves with longer data windows
-
-4. Technical Indicators
-
-RSI(14) via smoothed average gains/losses
-
-MACD(12,26,9): $EMA_{12} - EMA_{26}$; Signal line = $EMA_9(MACD)$
-
-Bollinger Width:
-
-𝐵
-𝑊
-𝑡
-=
-𝑈
-𝑝
-𝑝
-𝑒
-𝑟
-𝑡
-−
-𝐿
-𝑜
-𝑤
-𝑒
-𝑟
-𝑡
-𝑀
-𝐴
-20
-,
-𝑡
-BW
-t
-	​
-
-=
-MA
-20,t
-	​
-
-Upper
-t
-	​
-
-−Lower
-t
-	​
-
-	​
-
-5. Feature Engineering (for ML)
-
-For each ticker (chronologically sorted):
-
-Lags: Sent_lag{1,2,3,5}, Ret_lag{1,2,3,5}
-
-Rolling windows: Sent_roll{3,5,10}, Ret_roll{5,10,20}
-
-Volatility measures: Sent_vol{3,5,10}, Ret_vol{5,10,20}
-
-Indicators: RSI14, MACD, MACD_signal, Bollinger width
-
-Target: TargetNext = Return_{t+1} (1-day ahead)
-
-6. Modeling & Validation
-
-Models:
-
-Ridge Regression (L2)
-
-XGBoost Regressor
-
-Walk-forward cross-validation ensures time-ordered splits:
-For a dataset of length $N$, training expands incrementally, and validation occurs on subsequent folds.
-
-Metrics
-
-Coefficient of determination:
-
-𝑅
-2
-=
-1
-−
-∑
-(
-𝑦
-−
-𝑦
-^
-)
-2
-∑
-(
-𝑦
-−
-𝑦
-ˉ
-)
-2
-R
-2
-=1−
-∑(y−
-y
-ˉ
-	​
-
-)
-2
-∑(y−
-y
-^
-	​
-
-)
-2
-	​
-
-
-Mean Absolute Error (MAE):
-
-𝑀
-𝐴
-𝐸
-=
-1
-𝑛
-∑
-∣
-𝑦
-−
-𝑦
-^
-∣
-MAE=
-n
-1
-	​
-
-∑∣y−
-y
-^
-	​
-
-∣
-
-All evaluation is strictly out-of-sample.
-
-7. Trading Signals & Backtest
-
-Entry (Long):
-
-Sentiment_t > 0 AND MACD_t > Signal_t AND RSI_t < 70
-
-
-Exit:
-
-Sentiment_t < 0 OR RSI_t > 70
-
-
-KPIs:
-
-CAGR (annualized growth)
-
-Sharpe Ratio
-
-Max Drawdown
-
-Win Rate
-
-⚠️ This is an educational demonstration, not financial advice.
-
-🧪 Statistical Notes
-
-Small-sample bias: prefer ≥ 60–90 trading days
-
-Non-stationarity: walk-forward CV mitigates drift
-
-Multiple comparisons: control with holdout periods
-
-Robustness: use median/rank correlations for outlier-prone returns
-
-⚙️ Quick Start
-# 1. Install dependencies
+```bash
+git clone https://github.com/AhmedTAlzahrani/ai-market-sentiment-analyzer.git
+cd ai-market-sentiment-analyzer
 pip install -r requirements.txt
+```
 
-# 2. Run the entire pipeline
+### 2. Run the Pipeline
+
+```bash
 python run_all.py
+```
 
-# 3. Launch the Streamlit dashboard
+This executes every step sequentially:
+
+```
+collect_data.py → sentiment_analysis_finbert.py → merge_sentiment_prices.py →
+compute_indicators.py → features_signal_engine.py → walkforward_cv.py →
+backtest_pro.py → analyze_correlation.py → report_daily.py
+```
+
+All outputs are saved to `data/processed/`.
+
+### 3. Launch the Dashboard
+
+```bash
 streamlit run app.py
+```
 
-Minimal requirements.txt
+### Requirements
+
+```
 transformers
 torch
 tqdm
@@ -459,36 +85,211 @@ plotly
 streamlit
 statsmodels
 reportlab
+requests
+beautifulsoup4
+```
 
-🧷 Tips for Reproducibility
+---
 
-Ensure data/raw/finviz_news.csv exists
+## Key Outcomes
 
-If OLS trendline fails → pip install statsmodels
+| Metric | Value |
+|---|---|
+| **Sentiment Source** | ~400 FinViz headlines per run, aggregated daily via FinBERT |
+| **Market Data** | Daily closing prices & returns from Yahoo Finance |
+| **Example Insight** | SPY shows Pearson *r* ≈ +0.356 (moderate positive association) |
+| **Deliverables** | CSVs in `data/processed/` + interactive Streamlit dashboard |
 
-FinBERT first run downloads a ~438MB model (cached afterward)
+> All results dynamically update when new data is fetched. Treat values as evolving estimates that stabilize over time.
 
-Always run via run_all.py for consistent CSV generation
+---
 
-Fix random seeds for deterministic ML experiments
+## Dashboard
 
-📑 License & Attribution
+The Streamlit app (`app.py`) provides six interactive tabs:
 
-Code: MIT License
+| Tab | Description |
+|---|---|
+| **Sentiment Trend** | FinBERT daily sentiment time series by ticker |
+| **Sentiment vs Return** | Scatter plot with OLS trendline |
+| **Correlation Summary** | Pearson *r* per ticker (bar chart + table) |
+| **Indicators** | RSI(14), MACD(12/26/9), Bollinger Band width |
+| **Predictions (WF-CV)** | Out-of-sample R² & MAE for Ridge and XGBoost |
+| **Backtest & Signals** | Strategy KPIs and equity curves |
 
-Model: FinBERT by ProsusAI
+---
 
-Market Data: Yahoo Finance via yfinance
+## Repository Structure
 
-For research and educational use only
+```
+ai-market-sentiment-analyzer/
+├── data/
+│   ├── raw/                          # Price CSVs + headlines
+│   └── processed/                    # Pipeline outputs (ready to use)
+├── src/
+│   ├── collect_data.py               # Scrape FinViz + download prices
+│   ├── sentiment_analysis_finbert.py # FinBERT sentiment scoring
+│   ├── merge_sentiment_prices.py     # Join sentiment with returns
+│   ├── compute_indicators.py         # RSI, MACD, Bollinger Bands
+│   ├── features_signal_engine.py     # Feature engineering + signals
+│   ├── walkforward_cv.py             # Walk-forward cross-validation
+│   ├── backtest_pro.py               # Rule-based backtesting
+│   ├── analyze_correlation.py        # Pearson correlation summary
+│   ├── model_predict.py              # Ridge prediction (standalone)
+│   ├── report_daily.py               # Auto-generate PDF report
+│   └── _app_helpers.py               # Shared loaders for dashboard
+├── app.py                            # Streamlit dashboard
+├── run_all.py                        # One-command full pipeline
+└── README.md
+```
 
-🙏 Acknowledgments
+---
 
-Special thanks to open-source contributors of:
-Transformers, scikit-learn, XGBoost, Plotly, and Streamlit
+## Output Files
 
-🌐 Visual Pipeline Overview
-<p align="center"> <img src="https://raw.githubusercontent.com/AhmedTAlzahrani/ai-market-sentiment-analyzer/main/assets/pipeline_overview.png" alt="Pipeline Overview" width="90%"> </p> <p align="center"> <b>Data → Sentiment → Merge → Indicators → ML → Backtest → Dashboard</b> </p> <p align="center"> <img src="https://img.shields.io/badge/Data-News%20%2B%20Market-lightblue?style=flat-square"> <img src="https://img.shields.io/badge/NLP-FinBERT-blueviolet?style=flat-square"> <img src="https://img.shields.io/badge/ML-XGBoost%20%7C%20Ridge-orange?style=flat-square"> <img src="https://img.shields.io/badge/App-Streamlit-red?style=flat-square"> <img src="https://img.shields.io/badge/Output-Correlation%20%7C%20Forecast%20%7C%20KPIs-green?style=flat-square"> </p>
-🔚 TL;DR
+| File | Description |
+|---|---|
+| `data/raw/finviz_news.csv` | Headlines (Ticker, Date, Headline) |
+| `data/processed/daily_sentiment_finbert.csv` | Daily FinBERT sentiment per ticker |
+| `data/processed/sentiment_price_merged.csv` | Combined sentiment + market returns |
+| `data/processed/technical_indicators.csv` | RSI14, MACD, MACD signal, Bollinger width |
+| `data/processed/features_dataset.csv` | ML features + target variable |
+| `data/processed/model_cv_results.csv` | Walk-forward CV metrics |
+| `data/processed/predictions_nextday.csv` | Latest next-day return predictions |
+| `data/processed/signals_dataset.csv` | Entry/exit trading signals |
+| `data/processed/backtest_results.csv` | Strategy KPIs (CAGR, Sharpe, MaxDD) |
+| `output/Daily_Brief_*.pdf` | Auto-generated daily report (optional) |
 
-This repository shows — with full scientific transparency — how financial news sentiment (FinBERT) interacts with market returns, validates predictive strength via walk-forward ML, and visualizes everything in one Streamlit dashboard.
+---
+
+## Scientific Methodology
+
+### 1. Text to Sentiment (FinBERT)
+
+- **Model:** [`ProsusAI/finbert`](https://huggingface.co/ProsusAI/finbert)
+- **Output:** Probabilities *p(neg)*, *p(neu)*, *p(pos)*
+- **Score:** `p(pos) - p(neg)` &rarr; range **[-1, +1]**
+- **Aggregation:** Mean sentiment per (Ticker, Date)
+
+### 2. Market Data & Returns
+
+- **Source:** Yahoo Finance via [`yfinance`](https://github.com/ranaroussi/yfinance)
+- **Daily return:**
+
+$$r_t = 100 \times \frac{P_t - P_{t-1}}{P_{t-1}}$$
+
+where $P_t$ is the closing price on day *t*. Data are joined on (Ticker, Date) to prevent look-ahead bias.
+
+### 3. Correlation Analysis
+
+Pearson correlation between sentiment $S_t$ and return $R_t$:
+
+$$r = \frac{\sum (S_t - \bar{S})(R_t - \bar{R})}{\sqrt{\sum (S_t - \bar{S})^2 \cdot \sum (R_t - \bar{R})^2}}$$
+
+where $r \in [-1, 1]$. Small samples can inflate $|r|$; stability improves with longer data windows.
+
+### 4. Technical Indicators
+
+| Indicator | Formula |
+|---|---|
+| **RSI(14)** | Smoothed average gains / losses over 14 periods |
+| **MACD(12,26,9)** | $EMA_{12} - EMA_{26}$; Signal = $EMA_9(\text{MACD})$ |
+| **Bollinger Width** | $(Upper - Lower) / MA_{20}$ |
+
+### 5. Feature Engineering
+
+For each ticker, chronologically sorted:
+
+- **Lags:** `Sent_lag{1,2,3,5}`, `Ret_lag{1,2,3,5}`
+- **Rolling means:** `Sent_roll{3,5,10}`, `Ret_roll{5,10,20}`
+- **Volatility:** `Sent_vol{3,5,10}`, `Ret_vol{5,10,20}`
+- **Indicators:** RSI14, MACD, MACD signal, Bollinger width
+- **Target:** `TargetNext = Return(t+1)` (1-day ahead)
+
+### 6. Modeling & Validation
+
+**Models:**
+- Ridge Regression (L2 regularization)
+- XGBoost Regressor
+
+**Walk-forward cross-validation** ensures strictly time-ordered splits: training expands incrementally, validation occurs on subsequent folds. All evaluation is **out-of-sample**.
+
+**Metrics:**
+
+$$R^2 = 1 - \frac{\sum (y - \hat{y})^2}{\sum (y - \bar{y})^2} \qquad \text{MAE} = \frac{1}{n} \sum |y - \hat{y}|$$
+
+### 7. Trading Signals & Backtest
+
+| | Rule |
+|---|---|
+| **Entry (Long)** | Sentiment > 0 **AND** MACD > Signal **AND** RSI < 70 |
+| **Exit** | Sentiment < 0 **OR** RSI > 70 |
+
+**KPIs:** CAGR (annualized growth), Sharpe Ratio, Max Drawdown, Win Rate
+
+> **Disclaimer:** This is an educational demonstration, not financial advice.
+
+---
+
+## Statistical Notes
+
+- **Small-sample bias:** Prefer >= 60-90 trading days for reliable estimates
+- **Non-stationarity:** Walk-forward CV mitigates distributional drift
+- **Multiple comparisons:** Control with holdout periods
+- **Robustness:** Consider median/rank correlations for outlier-prone returns
+
+---
+
+## Tips for Reproducibility
+
+- Ensure `data/raw/finviz_news.csv` exists before running the pipeline
+- If OLS trendline fails, install statsmodels: `pip install statsmodels`
+- FinBERT downloads a ~438 MB model on first run (cached afterward)
+- Always run via `run_all.py` for consistent CSV generation
+- Fix random seeds for deterministic ML experiments
+
+---
+
+## Pipeline Overview
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AhmedTAlzahrani/ai-market-sentiment-analyzer/main/assets/pipeline_overview.png" alt="Pipeline Overview" width="90%">
+</p>
+
+<p align="center">
+  <b>Data &rarr; Sentiment &rarr; Merge &rarr; Indicators &rarr; ML &rarr; Backtest &rarr; Dashboard</b>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Data-News%20%2B%20Market-lightblue?style=flat-square">
+  <img src="https://img.shields.io/badge/NLP-FinBERT-blueviolet?style=flat-square">
+  <img src="https://img.shields.io/badge/ML-XGBoost%20%7C%20Ridge-orange?style=flat-square">
+  <img src="https://img.shields.io/badge/App-Streamlit-red?style=flat-square">
+  <img src="https://img.shields.io/badge/Output-Correlation%20%7C%20Forecast%20%7C%20KPIs-green?style=flat-square">
+</p>
+
+---
+
+## License & Attribution
+
+- **Code:** MIT License
+- **Model:** [FinBERT](https://huggingface.co/ProsusAI/finbert) by ProsusAI
+- **Market Data:** Yahoo Finance via [yfinance](https://github.com/ranaroussi/yfinance)
+- For **research and educational use** only
+
+---
+
+## Acknowledgments
+
+Special thanks to the open-source communities behind
+[Transformers](https://huggingface.co/docs/transformers),
+[scikit-learn](https://scikit-learn.org),
+[XGBoost](https://xgboost.readthedocs.io),
+[Plotly](https://plotly.com),
+and [Streamlit](https://streamlit.io).
+
+---
+
+<p align="center">
+  <b>TL;DR</b> — This repository shows, with full scientific transparency, how financial news sentiment (FinBERT) interacts with market returns, validates predictive strength via walk-forward ML, and visualizes everything in one Streamlit dashboard.
+</p>
