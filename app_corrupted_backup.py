@@ -7,7 +7,7 @@ import plotly.express as px, plotly.graph_objects as go
 import streamlit as st
 from src._app_helpers import load_indicators_df, load_predictions_df
 
-st.set_page_config(page_title="AI Market Sentiment Analyzer", page_icon="??", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="AI Market Sentiment Analyzer", page_icon="üíπ", layout="wide", initial_sidebar_state="expanded")
 
 # ---- Styling (dark, elegant) ----
 st.markdown("""
@@ -46,8 +46,6 @@ def load_corr():
 def df_to_csv_bytes(df: pd.DataFrame) -> bytes:
     buf = io.StringIO(); df.to_csv(buf, index=False); return buf.getvalue().encode("utf-8")
 
-sentiment = load_sentiment()
-
 # ---- Sector mapping (customize) ----
 SECTOR_MAP = {
     "SPY":"Index","AAPL":"Tech","NVDA":"Tech","TSLA":"Auto",
@@ -58,17 +56,18 @@ def sector_frame(sent_df):
     grp = df.groupby(["Date","Sector"])["SentimentScore"].mean().reset_index()
     return grp
 
+sentiment = load_sentiment()
 merged = load_merged()
 corr = load_corr()
 tech = load_indicators_df()
 preds = load_predictions_df()
 
 if sentiment.empty:
-    st.error("? No sentiment data found. Run the pipeline first.")
+    st.error("‚ö† No sentiment data found. Run the pipeline first.")
     st.stop()
 
 # ---- Sidebar ----
-st.sidebar.title("?? Controls")
+st.sidebar.title("üéõ Controls")
 all_tickers = sorted(sentiment["Ticker"].unique().tolist())
 default = [t for t in ["SPY","AAPL","NVDA","TSLA"] if t in all_tickers] or all_tickers[:3]
 sel = st.sidebar.multiselect("Tickers", all_tickers, default=default)
@@ -76,27 +75,17 @@ sel = st.sidebar.multiselect("Tickers", all_tickers, default=default)
 date_min, date_max = sentiment["Date"].min(), sentiment["Date"].max()
 d1, d2 = st.sidebar.date_input("Date range", value=(date_min.date(), date_max.date()))
 smooth = st.sidebar.slider("Sentiment smoothing (days)", 1, 14, 3)
-rm_out = st.sidebar.checkbox("Remove return outliers (±3s)", value=True)
+rm_out = st.sidebar.checkbox("Remove return outliers (¬±3s)", value=True)
 overlay_price = st.sidebar.checkbox("Overlay price", value=True)
 st.sidebar.markdown("---")
-if st.sidebar.button("?? Run Pipeline Now", use_container_width=True):
+if st.sidebar.button("üîÑ Run Pipeline Now", use_container_width=True):
     with st.spinner("Running run_all.py ..."):
         res = subprocess.run(["python","run_all.py"], capture_output=True, text=True)
         if res.returncode == 0:
             st.success("Pipeline done. Reloading data...")
             load_sentiment.clear(); load_merged.clear(); load_corr.clear()
             sentiment = load_sentiment()
-
-# ---- Sector mapping (customize) ----
-SECTOR_MAP = {
-    "SPY":"Index","AAPL":"Tech","NVDA":"Tech","TSLA":"Auto",
-}
-def sector_frame(sent_df):
-    df = sent_df.copy()
-    df["Sector"] = df["Ticker"].map(SECTOR_MAP).fillna("Other")
-    grp = df.groupby(["Date","Sector"])["SentimentScore"].mean().reset_index()
-    return grp
- merged = load_merged(); corr = load_corr()
+            merged = load_merged(); corr = load_corr()
             tech = load_indicators_df(); preds = load_predictions_df()
         else:
             st.error("Pipeline failed. See output below:"); st.code(res.stdout + "\n" + res.stderr)
@@ -115,7 +104,7 @@ if rm_out and not merge_f.empty:
     merge_f = merge_f.groupby("Ticker", group_keys=False).apply(lambda g: g[(g["Return"]-g["Return"].mean()).abs() <= 3*g["Return"].std(ddof=0)] if g["Return"].std(ddof=0)>0 else g)
 
 # ---- Header + KPIs ----
-st.markdown("## ?? AI Market Sentiment Analyzer ó Expert")
+st.markdown("## üíπ AI Market Sentiment Analyzer ‚Äî Expert")
 c1,c2,c3,c4 = st.columns(4)
 def kpi(col, title, val):
     with col:
@@ -130,15 +119,15 @@ if not merge_f.empty:
 overall_corr = np.nan
 if not merge_f.empty and merge_f["SentimentScore"].std(ddof=0)>0 and merge_f["Return"].std(ddof=0)>0:
     overall_corr = merge_f["SentimentScore"].corr(merge_f["Return"])
-kpi(c1,"Latest Date", latest_date.strftime("%Y-%m-%d") if latest_date else "ó")
-kpi(c2,"Avg Sentiment (latest)", f"{latest_avg_sent:0.3f}" if pd.notna(latest_avg_sent) else "ó")
-kpi(c3,"Avg Return (latest)", f"{latest_avg_ret:0.2f}%" if pd.notna(latest_avg_ret) else "ó")
-kpi(c4,"Corr (Sent ? Ret)", f"{overall_corr:0.3f}" if pd.notna(overall_corr) else "ó")
+kpi(c1,"Latest Date", latest_date.strftime("%Y-%m-%d") if latest_date else "‚Äî")
+kpi(c2,"Avg Sentiment (latest)", f"{latest_avg_sent:0.3f}" if pd.notna(latest_avg_sent) else "‚Äî")
+kpi(c3,"Avg Return (latest)", f"{latest_avg_ret:0.2f}%" if pd.notna(latest_avg_ret) else "‚Äî")
+kpi(c4,"Corr (Sent ‚Üí Ret)", f"{overall_corr:0.3f}" if pd.notna(overall_corr) else "‚Äî")
 
 # ---- Tabs ----
 t1, t2, t3, t4, t5, t6 = st.tabs([
-    "?? Sentiment & Price", "?? Sentiment vs Return", "?? Correlations",
-    "?? Indicators", "?? Predictions & Backtest", "?? Downloads"
+    "üìà Sentiment & Price", "üîÄ Sentiment vs Return", "üìä Correlations",
+    "üß≠ Indicators", "ü§ñ Predictions & Backtest", "üì• Downloads"
 ])
 
 # TAB 1
@@ -151,7 +140,7 @@ with t1:
             s = sent_f[sent_f["Ticker"]==t]
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=s["Date"], y=s["SentSmooth"], mode="lines+markers", name="Sentiment (smooth)"))
-            fig.update_layout(template="plotly_dark", height=350, title=f"{t} ó Sentiment")
+            fig.update_layout(template="plotly_dark", height=350, title=f"{t} ‚Äî Sentiment")
             if overlay_price and not merge_f.empty:
                 pm = merge_f[merge_f["Ticker"]==t]
                 if not pm.empty:
@@ -170,11 +159,11 @@ with t2:
         for t in sel:
             m = merge_f[merge_f["Ticker"]==t]
             if m.empty: continue
-            sc = px.scatter(m, x="SentimentScore", y="Return", color=m["Date"].dt.strftime("%Y-%m-%d"), trendline="ols", title=f"{t} ó Sentiment vs Return")
+            sc = px.scatter(m, x="SentimentScore", y="Return", color=m["Date"].dt.strftime("%Y-%m-%d"), trendline="ols", title=f"{t} ‚Äî Sentiment vs Return")
             sc.update_layout(template="plotly_dark", height=420)
             st.plotly_chart(sc, use_container_width=True)
             corr_t = m["SentimentScore"].corr(m["Return"]) if m["SentimentScore"].std(ddof=0)>0 and m["Return"].std(ddof=0)>0 else np.nan
-            st.caption(f"{t} Pearson corr: **{corr_t:.3f}**" if pd.notna(corr_t) else f"{t} Pearson corr: ó")
+            st.caption(f"{t} Pearson corr: **{corr_t:.3f}**" if pd.notna(corr_t) else f"{t} Pearson corr: ‚Äî")
             st.markdown("---")
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -187,7 +176,7 @@ with t3:
         st.dataframe(corr, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 4 ó Indicators
+# TAB 4 ‚Äî Indicators
 with t4:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("Technical indicators (RSI, MACD, Bollinger width)")
@@ -200,7 +189,7 @@ with t4:
             # Price + MACD
             figp = go.Figure()
             figp.add_trace(go.Scatter(x=ti["Date"], y=ti["Close"], name="Close"))
-            figp.update_layout(template="plotly_dark", height=320, title=f"{t} ó Close & MACD")
+            figp.update_layout(template="plotly_dark", height=320, title=f"{t} ‚Äî Close & MACD")
             figp.add_trace(go.Scatter(x=ti["Date"], y=ti["MACD"], name="MACD", yaxis="y2"))
             figp.add_trace(go.Scatter(x=ti["Date"], y=ti["MACD_signal"], name="Signal", yaxis="y2"))
             figp.update_layout(yaxis2=dict(title="MACD", overlaying="y", side="right"))
@@ -211,21 +200,21 @@ with t4:
             figr.add_trace(go.Scatter(x=ti["Date"], y=ti["RSI14"], name="RSI14"))
             figr.add_hline(y=70, line_dash="dot", line_color="red")
             figr.add_hline(y=30, line_dash="dot", line_color="green")
-            figr.update_layout(template="plotly_dark", height=250, title=f"{t} ó RSI14 (70/30)")
+            figr.update_layout(template="plotly_dark", height=250, title=f"{t} ‚Äî RSI14 (70/30)")
             st.plotly_chart(figr, use_container_width=True)
 
             # Bollinger width
             figbw = go.Figure()
             figbw.add_trace(go.Scatter(x=ti["Date"], y=ti["BB_width"], name="BB width"))
-            figbw.update_layout(template="plotly_dark", height=220, title=f"{t} ó Bollinger Band Width")
+            figbw.update_layout(template="plotly_dark", height=220, title=f"{t} ‚Äî Bollinger Band Width")
             st.plotly_chart(figbw, use_container_width=True)
             st.markdown("---")
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 5 ó Predictions & Backtest
+# TAB 5 ‚Äî Predictions & Backtest
 with t5:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("Ridge baseline ó predict next-day return")
+    st.subheader("Ridge baseline ‚Äî predict next-day return")
     if preds.empty:
         st.info("No predictions yet. Run: python src/model_predict.py")
     else:
@@ -245,13 +234,13 @@ with t5:
             joined["NextRet"] = joined.groupby("Ticker")["Return"].shift(-1)
             strat = joined[joined["Signal"]==1]["NextRet"].mean()
             bench = joined["Return"].mean()
-            st.write(f"**Avg next-day return when signal=1:** {str(round(float(strat),3)) if pd.notna(strat) else 'ó'}%")
-            st.write(f"**Benchmark avg daily return:** {str(round(float(bench),3)) if pd.notna(bench) else 'ó'}%")
+            st.write(f"**Avg next-day return when signal=1:** {str(round(float(strat),3)) if pd.notna(strat) else '‚Äî'}%")
+            st.write(f"**Benchmark avg daily return:** {str(round(float(bench),3)) if pd.notna(bench) else '‚Äî'}%")
         else:
             st.info("Need merged + indicators to simulate.")
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 6 ó Downloads
+# TAB 6 ‚Äî Downloads
 with t6:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("Export datasets")
@@ -272,7 +261,7 @@ with t6:
 
 
 # Extra tabs
-t7, t8, t9 = st.tabs(["?? Signals & Backtest Pro", "?? Models (WF-CV)", "?? Sector Heatmap"])
+t7, t8, t9 = st.tabs(["üìã Signals & Backtest Pro", "üß™ Models (WF-CV)", "üåê Sector Heatmap"])
 
 with t7:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -287,7 +276,7 @@ with t7:
         if os.path.exists("data/processed/equity_curve.csv"):
             eq = pd.read_csv("data/processed/equity_curve.csv")
             for t in [x for x in eq.columns if x!="Unnamed: 0"]:
-                fig = px.line(eq, x=eq.columns[0], y=t, title=f"Equity Curve ? {t}")
+                fig = px.line(eq, x=eq.columns[0], y=t, title=f"Equity Curve ‚Äî {t}")
                 fig.update_layout(template="plotly_dark", height=300)
                 st.plotly_chart(fig, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -296,14 +285,14 @@ with t8:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("Walk-Forward CV (Ridge & XGBoost)")
     cv = pd.read_csv("data/processed/model_cv_results.csv") if os.path.exists("data/processed/model_cv_results.csv") else pd.DataFrame()
-    preds = pd.read_csv("data/processed/predictions_nextday.csv") if os.path.exists("data/processed/predictions_nextday.csv") else pd.DataFrame()
+    preds_wf = pd.read_csv("data/processed/predictions_nextday.csv") if os.path.exists("data/processed/predictions_nextday.csv") else pd.DataFrame()
     if cv.empty:
         st.info("Run: walkforward_cv.py")
     else:
         st.dataframe(cv, use_container_width=True)
-    if not preds.empty:
+    if not preds_wf.empty:
         st.markdown("**Latest predicted next-day returns**")
-        st.dataframe(preds, use_container_width=True)
+        st.dataframe(preds_wf, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 with t9:
@@ -321,7 +310,7 @@ with t9:
             st.plotly_chart(hm, use_container_width=True)
         st.markdown("**Sector averages over time**")
         for sct in pivot.columns:
-            fig = px.line(sf[sf["Sector"]==sct], x="Date", y="SentimentScore", title=f"{sct} ? average sentiment")
+            fig = px.line(sf[sf["Sector"]==sct], x="Date", y="SentimentScore", title=f"{sct} ‚Äî average sentiment")
             fig.update_layout(template="plotly_dark", height=300)
             st.plotly_chart(fig, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)

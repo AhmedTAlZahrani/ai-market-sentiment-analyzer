@@ -1,8 +1,8 @@
-﻿import os
+import os
 from datetime import datetime
 
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-print(f"🚀 Starting pipeline at {timestamp}\n")
+print(f"\n🚀 Starting pipeline at {timestamp}\n")
 
 steps = [
     "python src/collect_data.py",
@@ -16,11 +16,11 @@ steps = [
     "python src/report_daily.py",
 ]
 
-for s in steps:
-    print(f'\n▶️ {s}')
-    rc = os.system(s)
+for step in steps:
+    print(f"\n▶️  {step}")
+    rc = os.system(step)
     if rc != 0:
-        print(f"❌ Failed: {s}")
+        print(f"❌ Failed: {step}")
         break
 
 print("\n✅ Pipeline completed.")
